@@ -33,7 +33,6 @@ function ensure_preview_dir() {
 }
 
 function get_images() {
-	// ensure that _thumbnails folder exists
 	// read dir content; remove pseudo dirs
 	$files = array_values(array_diff(scandir(dirname(__FILE__)), array('.', '..')));
 	foreach ($files as $i => $file) {
@@ -52,14 +51,8 @@ function generate_preview($source, $target, $size) {
 	$image = imagecreatefromjpeg($source);
 	$imageW = imagesx($image);
 	$imageH = imagesy($image);
-	if ($imageW > $imageH) {
-		$previewW = $size;
-		$previewH = $imageH * ($size / $imageW);
-	}
-	else {
-		$previewH = $size;
-		$previewW = $imageW * ($size / $imageH);
-	}
+	$previewW = ($imageW >= $imageH) ? $size : $imageW * ($size / $imageH);
+	$previewH = ($imageW <= $imageH) ? $size : $imageH * ($size / $imageW);
 	$preview = imagecreatetruecolor($previewW, $previewH);
 	imagecopyresampled($preview, $image, 0, 0, 0, 0, $previewW, $previewH, $imageW, $imageH);
 	imagejpeg($preview, $target);
