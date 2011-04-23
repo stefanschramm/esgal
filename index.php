@@ -2,6 +2,7 @@
 
 // configuration
 define('PREVIEW_SIZE', 150);
+define('PREVIEW_QUALITY', 90);
 define('SHOW_FILENAME', true);
 
 function simplegallery_init() {
@@ -9,13 +10,15 @@ function simplegallery_init() {
 }
 
 if (isset($_GET['preview'])) {
-
-	// TODO: sanitize input correctly!!!
-	if ( ! preg_match('/\.(jpg|jpeg|JPG|JPEG)$/', $_GET['preview'])) {
+	// TODO: sanitize input correctly!!! (basename?)
+	if ( ! file_filter($_GET['preview'])) {
 		exit();
 	}
+	output_preview($_GET['preview']);
+	exit();
+}
 
-	$image = $_GET['preview'];
+function output_preview($image) {
 	$previewFile = 'thumbnails_' . PREVIEW_SIZE . '/' . $image;
 	ensure_preview_dir();
 	if ( ! is_file($previewFile)) {
@@ -23,7 +26,6 @@ if (isset($_GET['preview'])) {
 	}
 	header("Content-type: image/jpeg");
 	echo file_get_contents($previewFile);
-	exit();
 }
 
 function ensure_preview_dir() {
@@ -32,19 +34,20 @@ function ensure_preview_dir() {
 	}
 }
 
+function file_filter($filename) {
+	// accept only JPEG-extensions
+	return preg_match('/\.(jpg|jpeg|JPG|JPEG)$/', $filename);
+}
+
 function get_images() {
-	// read dir content; remove pseudo dirs
-	$files = array_values(array_diff(scandir(dirname(__FILE__)), array('.', '..')));
-	foreach ($files as $i => $file) {
-		if ( ! preg_match('/\.(jpg|jpeg|JPG|JPEG)$/', $file)) {
-			unset($files[$i]);
-		}
-	}
-	return $files;
+	// get sorted list of JPEG images from current directory
+	$images = array_filter(scandir(dirname(__FILE__)), 'file_filter');
+	sort($images);
+	return $images;
 }
 
 function get_preview_link($image) {
-	return '?preview=' . $image;
+	return '?preview=' . h($image);
 }
 
 function generate_preview($source, $target, $size) {
@@ -55,9 +58,13 @@ function generate_preview($source, $target, $size) {
 	$previewH = ($imageW <= $imageH) ? $size : $imageH * ($size / $imageW);
 	$preview = imagecreatetruecolor($previewW, $previewH);
 	imagecopyresampled($preview, $image, 0, 0, 0, 0, $previewW, $previewH, $imageW, $imageH);
-	imagejpeg($preview, $target);
+	imagejpeg($preview, $target, PREVIEW_QUALITY);
 	imagedestroy($image);
 	imagedestroy($preview);
+}
+
+function h($text) {
+	return htmlspecialchars($text);
 }
 
 
@@ -131,10 +138,10 @@ a, a:active, a:visited, a:hover {
 		<h1>Fotos</h1>
 		<div id="images">
 <? foreach(get_images() as $image): ?>
-				<a class="image" href="<?= $image ?>"><img src="<?= get_preview_link($image) ?>" alt="<?= $image ?>" /><? if(SHOW_FILENAME): ?><br /><?= $image ?><? endif ?></a>
+				<a class="image" href="<?= h($image) ?>"><img src="<?= get_preview_link($image) ?>" alt="<?= h($image) ?>" /><? if(SHOW_FILENAME): ?><br /><?= h($image) ?><? endif ?></a>
 <? endforeach ?>
 			<div class="clear"></div>
 		</div>
-		<div id="footer">Gallery generated automatically using ESGAL.</div>
+		<div id="footer">Gallery generated automatically using <a href="http://stefanschramm.net/dev/esgal/">ESGAL</a>.</div>
 	</body>
 </html>
