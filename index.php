@@ -5,21 +5,25 @@ define('PREVIEW_SIZE', 150);
 define('PREVIEW_QUALITY', 90);
 define('SHOW_FILENAME', true);
 
+define('THUMBNAILS_DIR_PREFIX', 'thumbnails_');
+define('PREVIEW_GET_VAR', 'preview');
+define('JPEG_FILENAME_REGEXP', '/\.(jpg|jpeg|JPG|JPEG)$/');
+
 function simplegallery_init() {
 	ensure_preview_dir();
 }
 
-if (isset($_GET['preview'])) {
-	// TODO: sanitize input correctly!!! (basename?)
-	if ( ! file_filter($_GET['preview'])) {
-		exit();
-	}
-	output_preview($_GET['preview']);
+if (isset($_GET[PREVIEW_GET_VAR])) {
+	output_preview($_GET[PREVIEW_GET_VAR]);
 	exit();
 }
 
 function output_preview($image) {
-	$previewFile = 'thumbnails_' . PREVIEW_SIZE . '/' . $image;
+	$image = basename($image);
+	if ( ! file_filter($image) || ! is_file($image)) {
+		exit();
+	}
+	$previewFile = THUMBNAILS_DIR_PREFIX . PREVIEW_SIZE . '/' . $image;
 	ensure_preview_dir();
 	if ( ! is_file($previewFile)) {
 		generate_preview($image, $previewFile, PREVIEW_SIZE);
@@ -29,14 +33,14 @@ function output_preview($image) {
 }
 
 function ensure_preview_dir() {
-	if ( ! is_dir('thumbnails_' . PREVIEW_SIZE)) {
-		mkdir('thumbnails_' . PREVIEW_SIZE);
+	if ( ! is_dir(THUMBNAILS_DIR_PREFIX . PREVIEW_SIZE)) {
+		mkdir(THUMBNAILS_DIR_PREFIX . PREVIEW_SIZE);
 	}
 }
 
 function file_filter($filename) {
 	// accept only JPEG-extensions
-	return preg_match('/\.(jpg|jpeg|JPG|JPEG)$/', $filename);
+	return preg_match(JPEG_FILENAME_REGEXP, $filename);
 }
 
 function get_images() {
@@ -47,7 +51,8 @@ function get_images() {
 }
 
 function get_preview_link($image) {
-	return '?preview=' . h($image);
+	// return '?preview=' . h($image);
+	return $_SERVER['REQUEST_URI'] . '?' . PREVIEW_GET_VAR . '=' . h($image);
 }
 
 function generate_preview($source, $target, $size) {
