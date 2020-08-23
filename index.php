@@ -1,4 +1,4 @@
-<?
+<?php
 
 // configuration
 define('PREVIEW_SIZE', 150);
@@ -229,36 +229,36 @@ a, a:active, a:visited, a:hover {
 	</head>
 	<body>
 		<h1><?= h(esgal_get_title()) ?></h1>
-<? if (isset($_GET[VIEW_GET_VAR])): ?>
+<?php if (isset($_GET[VIEW_GET_VAR])): ?>
 		<div id="navigation">
 <?
 $previous = esgal_get_previous($_GET[VIEW_GET_VAR]);
 $next = esgal_get_next($_GET[VIEW_GET_VAR]);
 ?>
-<? if ($previous != ""): ?>
+<?php if ($previous != ""): ?>
 			<a class="previous" href="<?= h(esgal_get_link($previous)) ?>">&lt;</a>
-<? else: ?>
+<?php else: ?>
 			<span>&nbsp;</span>
-<? endif ?>
+<?php endif ?>
 			<a class="up" href="<?= h(esgal_get_link()) ?>">^</a>
-<? if ($next != ""): ?>
+<?php if ($next != ""): ?>
 			<a class="next" href="<?= h(esgal_get_link($next)) ?>">&gt;</a>
-<? else: ?>
+<?php else: ?>
 			<span>&nbsp;</span>
-<? endif ?>
+<?php endif ?>
 			<div class="clear"></div>
 		</div>
 		<div id="viewimage">
 			<img src="<?= h($_GET[VIEW_GET_VAR]) ?>" alt="<?= h($_GET[VIEW_GET_VAR]) ?>" />
 		</div>
-<? else: ?>
+<?php else: ?>
 		<div id="images">
-<? foreach(esgal_get_images() as $image): ?>
-				<a class="image" href="<?= h(esgal_get_link($image)) ?>"><img src="<?= esgal_get_preview_link($image) ?>" alt="<?= h($image) ?>" /><? if(SHOW_FILENAME): ?><br /><?= h($image) ?><? endif ?></a>
-<? endforeach ?>
+<?php foreach(esgal_get_images() as $image): ?>
+				<a class="image" href="<?= h(esgal_get_link($image)) ?>"><img src="<?= esgal_get_preview_link($image) ?>" alt="<?= h($image) ?>" /><?php if(SHOW_FILENAME): ?><br /><?= h($image) ?><?php endif ?></a>
+<?php endforeach ?>
 			<div class="clear"></div>
 		</div>
-<? endif ?>
+<?php endif ?>
 		<div id="footer">Gallery generated automatically using <a href="http://stefanschramm.net/dev/esgal/">ESGAL</a>.</div>
 	</body>
 </html>
